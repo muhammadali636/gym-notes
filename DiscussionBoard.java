@@ -1,445 +1,399 @@
-/**
- * DiscussionBoard4.0 for Lab4 NOW WITH HASHMAP
- * Muhammad Ali, 1115336
- * Compile: javac DiscussionBoard.java
- * Run: java DiscussionBoard <filename>
+
+/*
+ DiscussionBoard5,0 for LAB NOW WITH GUI. Ignore polls
+ Muhammad Ali, 1115336
+ Compile: javac DiscussionBoard.java
+Run: java DiscussionBoard
  */
 
- import java.io.FileInputStream;
- import java.io.FileNotFoundException;
- import java.io.FileOutputStream;
- import java.io.PrintWriter;
- import java.util.ArrayList;
- import java.util.HashMap;
- import java.util.Scanner;
- import java.util.StringTokenizer;
- 
- //User class representing a user in the discussion board
- class User {
-     private String fullName;
-     private String username;
- 
-     public User(String fullName, String username) throws Exception {
-         if (fullName == null || fullName.isBlank()) { //throw exception when the full name is blank
-             throw new Exception("Full name cannot be blank");
-         }
-         if (username == null || username.isBlank()) { //throw exception if username is blank
-             throw new Exception("Username cannot be blank");
-         }
-         this.fullName = fullName;
-         this.username = username;
-     }
- 
-     public String getFullName() { //the name
-         return fullName;
-     }
- 
-     public String getUsername() { //user
-         return username;
-     }
- }
- 
- //Post class represents posts in discussion board
- class Post {
-     //Each post has title, content, and user. The user's first name is stored.
-     private static int idCounter = 1; //UNIQUE ID counter for posts
-     private int postId;
-     private String title;
-     private User user;
- 
-     public Post(String title, User user) throws Exception {
-         if (title == null || title.isBlank()) { //throw exception if title is blank.
-             throw new Exception("Title cannot be blank");
-         }
-         this.postId = idCounter; //assign unique ID
-         idCounter += 1; //UPP the ID by 1 each time
-         this.title = title;
-         this.user = user;
-     }
- 
-     public void display() {
-         System.out.println("Post #" + postId);
-         System.out.println("Created By: " + user.getFullName() + " (@" + user.getUsername() + ")");
-         System.out.println("Title: " + title);
-     }
- 
-     //getters
-     public int getPostId() {
-         return postId;
-     }
- 
-     public String getTitle() {
-         return title;
-     }
- 
-     public User getUser() {
-         return user;
-     }
- }
- 
- //textPost class represents a regular text post in discussion board
- class textPost extends Post {
-     private String content;
- 
-     public textPost(String title, String content, User user) throws Exception {
-         super(title, user); //superclass constructor to set title and user
-         if (content == null || content.isBlank()) { //throw exception if content is blank
-             throw new Exception("Content cannot be blank");
-         }
-         this.content = content;
-     }
- 
-     public void display() {
-         super.display();
-         System.out.println(content); //print content only once
-     }
- 
-     public String getContent() {
-         return content;
-     }
- }
- 
- //pollPost class represents a poll post with voting options
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JButton;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JMenuBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.BorderFactory;
+
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.Color;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Scanner;
+import java.util.StringTokenizer;
+
+
+//User class representing a user in  discussion board
+class User {
+    private String fullName;       //Users full nam
+    private String username; //User username. 
+
+    public User(String fullName, String username) throws Exception {
+        if (fullName == null || fullName.isBlank()) {      //Throw exception when  full name is blank.
+            throw new Exception("Full name cannot be blank");
+        }
+        if (username == null || username.isBlank()) {     //Throw exception if user is blank liek above
+            throw new Exception("Username cannot be blank");
+        }
+        this.fullName = fullName;
+        this.username = username;
+    }
+
+    public String getFullName() { //ret user full name
+        return fullName;
+    }
+
+    public String getUsername() { //ret  user username
+        return username;
+    }
+}
+
+//Post class represents posts in  discussion board
+class Post {
+    private static int idCounter = 1;      //unique ID counter for posts
+    private int postId;
+    private String title;
+    private User user;
+
+    public Post(String title, User user) throws Exception {
+        if (title == null || title.isBlank()) { //throw exception if title is blank
+            throw new Exception("Title cannot be blank");
+        }
+
+        this.postId = idCounter; //assign a unique ID
+        idCounter++;
+        this.title = title;
+        this.user = user;
+    }
+
+    public void display() { //display  post details
+        System.out.println("Post #" + postId);
+        System.out.println("Created By: " + user.getFullName() + " (@" + user.getUsername() + ")");
+        System.out.println("Title: " + title);
+    }
+
+    //GETTERS
+    public int getPostId() { //return post ID
+        return postId;
+    }
+
+    public String getTitle() {      //return the post title
+        return title;
+    }
+
+    public User getUser() {       //return the user who created the post
+        return user;
+    }
+}
+
+//textPost class represents a text post
+class textPost extends Post {
+    private String content;
+    public textPost(String title, String content, User user) throws Exception {
+        super(title, user);   //init with the superclass constructor
+        if (content == null || content.isBlank()) {   //throw exception if content is blank
+            throw new Exception("Content cannot be blank");
+        }
+
+        this.content = content;
+    }
+    public void display() { //display  post content
+        super.display();
+        System.out.println(content);
+    }
+    public String getContent() {        //return post content
+        return content;
+    }
+}
+
+ //  pollPost class represents a poll post with voting options. This is  Not gonna be used rn. Maybe in future.
  class pollPost extends Post {
-     private ArrayList<String> options; //list of options for voting
-     private ArrayList<Integer> votes; //vote count for each option
- 
-     public pollPost(String title, String optionsString, User user) throws Exception {
-         super(title, user);
-         options = new ArrayList<>();
-         votes = new ArrayList<>();
-         for (String option : optionsString.split(";")) {
-             options.add(option.trim());
-             votes.add(0);
-         }
-     }
- 
-     public void vote(int optionIndex) {
-         if (optionIndex >= 0 && optionIndex < votes.size()) {
-             votes.set(optionIndex, votes.get(optionIndex) + 1);
-         } 
-         else {
-             System.out.println("Invalid option selected.");
-         }
-     }
- 
-     public void display() {
-         super.display();
-         for (int i = 0; i < options.size(); i++) {
-             System.out.println(options.get(i) + ": " + votes.get(i));
-         }
-     }
- 
-     //getters
-     public ArrayList<String> getOptions() {
-         return options;
-     }
- 
-     public ArrayList<Integer> getVotes() {
-         return votes;
-     }
- }
- 
- public class DiscussionBoard {
-     private static ArrayList<User> users = new ArrayList<>(); //list of users
-     private static ArrayList<Post> posts = new ArrayList<>(); //list of posts
-     private static HashMap<String, ArrayList<Integer>> userPostIndex = new HashMap<>(); //HashMap to store post indices by username
- 
-     private static void addToUserPostIndex(String username, int postIndex) { //add post index to the user's list in the HashMap
-         userPostIndex.putIfAbsent(username, new ArrayList<>()); //initialize list for new username
-         userPostIndex.get(username).add(postIndex); //add post index to user's list
-     }
- 
-     private static int getValidInt(Scanner scanner, String prompt) { //prompt user until valid integer input is received
-         while (true) {
-             try {
-                 System.out.println(prompt);
-                 return Integer.parseInt(scanner.nextLine().trim());
-             } 
-             catch (NumberFormatException e) {
-                 System.out.println("Invalid input. Please enter a valid integer."); //if not valid input.
-             }
-         }
-     }
- 
-     public static void main(String[] args) {
-         Scanner scanner = new Scanner(System.in);
- 
-         //Load from file if filename provided
-         if (args.length > 0) {
-             String filename = args[0];
-             try (Scanner fileScanner = new Scanner(new FileInputStream("boards/" + filename + ".dboard"))) {
-                 User currentUser = null;
-                 String title = null;
-                 String content = null;
-                 ArrayList<String> options = new ArrayList<>();
-                 ArrayList<Integer> votes = new ArrayList<>();
- 
-                 while (fileScanner.hasNextLine()) {
-                     String line = fileScanner.nextLine().trim();
- 
-                     if (line.startsWith("Post #")) {
-                         options.clear();
-                         votes.clear();
-                         content = null;
-                     } 
-                     else if (line.startsWith("Created By:")) {
-                         String[] userParts = line.split(" @");
-                         String fullName = userParts[0].replace("Created By: ", "").trim();
-                         String username = userParts[1].replace(")", "").trim();
-                         currentUser = new User(fullName, username);
-                     } 
-                     else if (line.startsWith("Title:")) {
-                         title = line.replace("Title: ", "").trim();
-                     } 
-                     else if (line.contains(":")) {
-                         String[] optionParts = line.split(":");
-                         options.add(optionParts[0].trim());
-                         votes.add(Integer.parseInt(optionParts[1].trim()));
-                     } 
-                     else if (!line.isEmpty()) {
-                         content = line;
-                     } 
-                     else if (line.isEmpty()) {
-                         if (content != null) {
-                             posts.add(new textPost(title, content, currentUser));
-                         } 
-                         else if (!options.isEmpty()) {
-                             pollPost poll = new pollPost(title, String.join(";", options), currentUser);
-                             for (int i = 0; i < votes.size(); i++) {
-                                 poll.getVotes().set(i, votes.get(i));
-                             }
-                             posts.add(poll);
-                         }
-                     }
-                 }
-                 System.out.println("Discussion board loaded from file.");
-             } 
-             catch (FileNotFoundException e) {
-                 System.out.println("File not found. Starting with a blank discussion board.");
-             } 
-             catch (Exception e) {
-                 System.out.println("Error loading file: " + e.getMessage());
-             }
-         }
- 
-         //command loop with options
-         while (true) {
-             System.out.println("Select one:");
-             System.out.println("(1) Create new user");
-             System.out.println("(2) Create new post");
-             System.out.println("(3) View all posts");
-             System.out.println("(4) Vote in poll");
-             System.out.println("(5) View all posts with a given username");
-             System.out.println("(6) View all posts with a given keyword");
-             System.out.println("(7) Save Discussion Board");
-             System.out.println("(8) End Program");
- 
-             int operator = getValidInt(scanner, "Enter your choice:");
- 
-             try {
-                 switch (operator) {
-                     case 1: //create new user
-                         System.out.println("Enter your full name:");
-                         String fullName = scanner.nextLine();
-                         System.out.println("Enter a username:");
-                         String username = scanner.nextLine();
- 
-                         boolean userExists = false;
-                         for (User user : users) {
-                             if (user.getUsername().equals(username)) {
-                                 userExists = true;
-                                 break;
-                             }
-                         }
-                         if (!userExists) {
-                             User newUser = new User(fullName, username);
-                             users.add(newUser);
-                             System.out.println("User created.");
-                         } 
-                         else {
-                             System.out.println("Username exists.");
-                         }
-                         break;
- 
-                     case 2: //create new post
-                         System.out.println("Enter post type (text or poll):");
-                         String postType = scanner.nextLine().toLowerCase();
-                         System.out.println("Enter your username:");
-                         String postUsername = scanner.nextLine();
-                         User userFound = null;
- 
-                         for (User user : users) {
-                             if (user.getUsername().equals(postUsername)) {
-                                 userFound = user;
-                                 break;
-                             }
-                         }
- 
-                         if (userFound != null) {
-                             System.out.println("Enter the title of your post:");
-                             String title = scanner.nextLine();
- 
-                             if (postType.equals("text")) {
-                                 System.out.println("Enter content:");
-                                 String content = scanner.nextLine();
-                                 posts.add(new textPost(title, content, userFound));
-                                 addToUserPostIndex(userFound.getUsername(), posts.size() - 1);
-                                 System.out.println("Text post added.");
- 
-                             } 
-                             else if (postType.equals("poll")) {
-                                 System.out.println("Enter poll options separated by ';':");
-                                 String optionsString = scanner.nextLine();
-                                 pollPost newPoll = new pollPost(title, optionsString, userFound);
-                                 posts.add(newPoll);
-                                 addToUserPostIndex(userFound.getUsername(), posts.size() - 1);
-                                 System.out.println("Poll post added.");
-                             } 
-                             else {
-                                 System.out.println("Invalid post type.");
-                             }
-                         } 
-                         else {
-                             System.out.println("User not found. Register first!");
-                         }
-                         break;
- 
-                     case 3: //view all posts
-                         if (posts.isEmpty()) {
-                             System.out.println("Nothing has been posted yet!");
-                         } 
-                         else {
-                             for (Post post : posts) {
-                                 post.display(); //call display on each post
-                                 System.out.println(); //line for separation
-                             }
-                         }
-                         break;
- 
-                     case 4: //vote in poll
-                         System.out.println("Enter poll post ID to vote in:");
-                         int pollId = scanner.nextInt();
-                         scanner.nextLine(); //consume newline
- 
-                         Post pollPost = null;
- 
-                         //find pollpost VIA ID
-                         for (Post post : posts) {
-                             if (post.getPostId() == pollId && post instanceof pollPost) {
-                                 pollPost = post;
-                                 break;
-                             }
-                         }
- 
-                         //check if poll post was found and check if its a poll
-                         if (pollPost instanceof pollPost) {
-                             pollPost poll = (pollPost) pollPost;
- 
-                             //show poll options
-                             System.out.println("Poll: " + poll.getTitle());
-                             for (int i = 0; i < poll.getOptions().size(); i++) {
-                                 System.out.println((i + 1) + ". " + poll.getOptions().get(i) + ": " + poll.getVotes().get(i));
-                             }
- 
-                             //prompt for the user choice
-                             System.out.println("Select an option number to vote:");
-                             int choice = scanner.nextInt() - 1;
-                             scanner.nextLine(); //consume newline
- 
-                             //check choice and update the vote count
-                             if (choice >= 0 && choice < poll.getOptions().size()) {
-                                 poll.vote(choice);
-                                 System.out.println("Vote recorded successfully in poll ID: " + poll.getPostId());
-                             } 
-                             else {
-                                 System.out.println("Invalid choice.");
-                             }
-                         } else {
-                             System.out.println("Invalid poll ID!");
-                         }
-                         break;
- 
-                     case 5: //view all posts from given username
-                         System.out.println("Enter a username to search for:");
-                         String searchUser = scanner.nextLine().toLowerCase();
-                         ArrayList<Integer> postIndices = userPostIndex.get(searchUser);
- 
-                         if (postIndices != null && !postIndices.isEmpty()) {
-                             for (int index : postIndices) {
-                                 posts.get(index).display();
-                                 System.out.println();
-                             }
-                         } 
-                         else {
-                             System.out.println("No posts found for this username.");
-                         }
-                         break;
- 
-                     case 6: //search posts by keyword
-                         System.out.println("Enter a keyword to search:");
-                         String keyword = scanner.nextLine().toLowerCase();
- 
-                         boolean postFound = false;
-                         for (Post post : posts) {
-                             if (post instanceof textPost) {
-                                 String content = ((textPost) post).getContent().toLowerCase();
-                                 StringTokenizer tokenizer = new StringTokenizer(content);
-                                 while (tokenizer.hasMoreTokens()) {
-                                     String word = tokenizer.nextToken();
-                                     if (word.equals(keyword)) {
-                                         post.display();
-                                         System.out.println();
-                                         postFound = true;
-                                         break;
-                                     }
-                                 }
-                             }
-                         }
-                         if (!postFound) {
-                             System.out.println("No posts found containing this keyword.");
-                         }
-                         break;
- 
-                     case 7: //save discussion board to file
-                         System.out.println("Enter filename to save:");
-                         String filename = scanner.nextLine();
-                         try (PrintWriter outputStream = new PrintWriter(new FileOutputStream("boards/" + filename + ".dboard"))) {
-                             for (Post post : posts) {
-                                 outputStream.println("Post #" + post.getPostId());
-                                 outputStream.println("Created By: " + post.getUser().getFullName() + " (@" + post.getUser().getUsername() + ")");
-                                 outputStream.println("Title: " + post.getTitle());
-                                 if (post instanceof textPost) {
-                                     outputStream.println(((textPost) post).getContent());
-                                 } 
-                                 else if (post instanceof pollPost) {
-                                     pollPost poll = (pollPost) post;
-                                     for (int i = 0; i < poll.getOptions().size(); i++) {
-                                         outputStream.println(poll.getOptions().get(i) + ": " + poll.getVotes().get(i));
-                                     }
-                                 }
-                                 outputStream.println();
-                             }
-                             System.out.println("Discussion board saved successfully!");
-                         } 
-                         catch (FileNotFoundException e) {
-                             System.out.println("Error saving file.");
-                         }
-                         break;
- 
-                     case 8: //exit program
-                         System.out.println("Exiting program...");
-                         scanner.close();
-                         return;
- 
-                     default:
-                         System.out.println("Invalid input. Try again.");
-                 }
-             } 
-             catch (Exception e) {
-                 System.out.println("Error occurred: " + e.getMessage());
-             }
-         }
-     }
- }
- 
+    private ArrayList<String> options;    //list of options for voting
+    private ArrayList<Integer> votes;   //vote count for each option
+
+    public pollPost(String title, String optionsString, User user) throws Exception {
+        super(title, user);
+        options = new ArrayList<>();
+        votes = new ArrayList<>();
+        for (String option : optionsString.split(";")) {
+            options.add(option.trim());
+            votes.add(0);
+        }
+    }
+    //?????
+    public void vote(int optionIndex) {
+        if (optionIndex >= 0 && optionIndex < votes.size()) {
+            votes.set(optionIndex, votes.get(optionIndex) + 1);
+        } 
+        else {
+            System.out.println("Invalid option selected.");
+        }
+    }
+
+    public void display() {
+        super.display();
+        for (int i = 0; i < options.size(); i++) {
+            System.out.println(options.get(i) + ": " + votes.get(i));
+        }
+    }
+
+    //getters
+    public ArrayList<String> getOptions() {
+        return options;
+    }
+
+    public ArrayList<Integer> getVotes() {
+        return votes;
+    }
+}
+
+//DiscussionBoard class with GUI 
+public class DiscussionBoard extends JFrame implements ActionListener {
+    public static final int WIDTH = 600; // window width
+    public static final int HEIGHT = 400; //window height
+
+    private static ArrayList<User> users = new ArrayList<>(); //list of regist users
+    private static ArrayList<Post> posts = new ArrayList<>(); //list of posts
+    private static HashMap<String, ArrayList<Integer>> userPostIndex = new HashMap<>(); //map usernames to post indices
+
+    private JTextArea messagesArea; //area fiedldto display messages
+    private JPanel leftPanel; //panel for user inputs
+
+    public DiscussionBoard() {
+        super("Discussion Board");
+        setSize(WIDTH, HEIGHT);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        JMenuBar menuBar = new JMenuBar(); //menu bar for navigation
+        JMenu optionsMenu = new JMenu("Options");
+
+        JMenuItem registerMenu = new JMenuItem("Register User");
+        registerMenu.addActionListener(this); //action listener for  register menu
+        optionsMenu.add(registerMenu);
+
+        JMenuItem createPostMenu = new JMenuItem("Create Text Post");
+        createPostMenu.addActionListener(this); //action listener for  create post menu
+        optionsMenu.add(createPostMenu);
+
+        JMenuItem searchMenu = new JMenuItem("Search Posts");
+        searchMenu.addActionListener(this); //action listener for  search menu
+        optionsMenu.add(searchMenu);
+
+        menuBar.add(optionsMenu); //add menu to  menu bar
+        setJMenuBar(menuBar);
+
+        messagesArea = new JTextArea(); //text area to display messages
+        messagesArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(messagesArea);
+        add(scrollPane, BorderLayout.CENTER);
+
+        showRegisterPanel(); //display  register user panel by default
+    }
+
+    public void actionPerformed(ActionEvent e) { //handle menu actions
+        String command = e.getActionCommand();
+
+        if (command.equals("Register User")) {
+            showRegisterPanel();
+        } 
+        else if (command.equals("Create Text Post")) {
+            showCreatePostPanel();
+        } 
+        else if (command.equals("Search Posts")) {
+            showSearchPanel();
+        }
+    }
+
+    private void showRegisterPanel() { //display  register user panel
+        clearMessages();
+        leftPanel = new JPanel(new GridLayout(6, 1, 5, 5));
+        leftPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JLabel registerLabel = new JLabel("Register User", JLabel.CENTER);
+        JLabel fullNameLabel = new JLabel("Full Name:");
+        JTextField fullNameField = new JTextField();
+        JLabel usernameLabel = new JLabel("Username:");
+        JTextField usernameField = new JTextField();
+
+        JButton registerButton = new JButton("Register");
+        registerButton.setBackground(Color.BLUE); //set blue background (this is following lab guide slides)
+        registerButton.setForeground(Color.WHITE); //set white text
+        registerButton.setOpaque(true);
+        registerButton.setBorderPainted(false);
+
+        registerButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String fullName = fullNameField.getText().trim();
+                String username = usernameField.getText().trim();
+
+                try {
+                    for (User user : users) {
+                        if (user.getUsername().equalsIgnoreCase(username)) {
+                            throw new Exception("Username already exists.");
+                        }
+                    }
+
+                    User newUser = new User(fullName, username);
+                    users.add(newUser);
+                    messagesArea.append("User registered successfully: " + username + "\n");
+                } 
+                catch (Exception ex) {
+                    messagesArea.append("Error: " + ex.getMessage() + "\n");
+                }
+            }
+        });
+
+        leftPanel.add(registerLabel);
+        leftPanel.add(fullNameLabel);
+        leftPanel.add(fullNameField);
+        leftPanel.add(usernameLabel);
+        leftPanel.add(usernameField);
+        leftPanel.add(registerButton);
+
+        setLeftPanel(leftPanel);
+    }
+
+    private void showCreatePostPanel() { //display create post panel
+        clearMessages();
+        leftPanel = new JPanel(new GridLayout(6, 1, 5, 5));
+
+        JLabel createPostLabel = new JLabel("Create Text Post", JLabel.CENTER);
+        JLabel usernameLabel = new JLabel("Username:");
+        JTextField usernameField = new JTextField();
+        JLabel postBodyLabel = new JLabel("Post Body:");
+        JTextField postBodyField = new JTextField();
+
+        JButton createButton = new JButton("Create");
+        createButton.setBackground(Color.BLUE); //set blue background (following lab guide)
+        createButton.setForeground(Color.WHITE); //set white text
+        createButton.setOpaque(true);
+        createButton.setBorderPainted(false);
+
+        createButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String username = usernameField.getText().trim();
+                String postBody = postBodyField.getText().trim();
+
+                try {
+                    User userFound = null;
+
+                    for (User user : users) {
+                        if (user.getUsername().equalsIgnoreCase(username)) {
+                            userFound = user;
+                            break;
+                        }
+                    }
+
+                    if (userFound == null) {
+                        throw new Exception("User not found.");
+                    }
+
+                    if (postBody.isEmpty()) {
+                        throw new Exception("Post content cannot be blank.");
+                    }
+
+                    textPost newPost = new textPost("Text Post", postBody, userFound);
+                    posts.add(newPost);
+                    addToUserPostIndex(username, posts.size() - 1);
+                    messagesArea.append("Post created successfully by: " + username + "\n");
+                } 
+                catch (Exception ex) {
+                    messagesArea.append("Error: " + ex.getMessage() + "\n");
+                }
+            }
+        });
+        leftPanel.add(createPostLabel);
+        leftPanel.add(usernameLabel);
+        leftPanel.add(usernameField);
+        leftPanel.add(postBodyLabel);
+        leftPanel.add(postBodyField);
+        leftPanel.add(createButton);
+        setLeftPanel(leftPanel);
+    }
+
+    private void showSearchPanel() { //display search posts panel
+        clearMessages();
+        leftPanel = new JPanel(new GridLayout(6, 1, 5, 5));
+
+        JLabel searchLabel = new JLabel("Search Posts", JLabel.CENTER);
+        JLabel usernameLabel = new JLabel("Username:");
+        JTextField usernameField = new JTextField();
+
+        JButton searchButton = new JButton("Search");
+        searchButton.setBackground(Color.BLUE); //set blue background for search (we used thi sbefore).
+        searchButton.setForeground(Color.WHITE); //set white text
+        searchButton.setOpaque(true);
+        searchButton.setBorderPainted(false);
+        //UGH
+        searchButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String username = usernameField.getText().trim().toLowerCase();
+
+                try {
+                    if (username.isEmpty()) {
+                        throw new Exception("Username cannot be blank.");
+                    }
+
+                    ArrayList<Integer> postIndices = userPostIndex.get(username);
+
+                    if (postIndices != null && !postIndices.isEmpty()) {
+                        messagesArea.append("Posts by @" + username + ":\n"); //following sample guide
+
+                        for (int index : postIndices) {
+                            Post post = posts.get(index);
+
+                            if (post instanceof textPost) {
+                                textPost text = (textPost) post;
+                                messagesArea.append("Post #" + text.getPostId() + "\n");
+                                messagesArea.append("Created By: " + text.getUser().getFullName() + " (@" + text.getUser().getUsername() + ")\n");
+                                messagesArea.append("Title: " + text.getTitle() + "\n");
+                                messagesArea.append(text.getContent() + "\n\n");
+                            }
+                        }
+                    } 
+                    else {
+                        messagesArea.append("No posts found for user: @" + username + "\n");
+                    }
+                } 
+                catch (Exception ex) { //caught
+                    messagesArea.append("Error: " + ex.getMessage() + "\n");
+                }
+            }
+        });
+
+        leftPanel.add(searchLabel);
+        leftPanel.add(usernameLabel);
+        leftPanel.add(usernameField);
+        leftPanel.add(searchButton);
+
+        setLeftPanel(leftPanel);
+    }
+    private void addToUserPostIndex(String username, int postIndex) { //add post index to user list
+        userPostIndex.putIfAbsent(username.toLowerCase(), new ArrayList<>());
+        userPostIndex.get(username.toLowerCase()).add(postIndex);
+    }
+    private void setLeftPanel(JPanel panel) { //update left panel with tnew panel
+        getContentPane().removeAll();
+        add(panel, BorderLayout.WEST);
+        add(new JScrollPane(messagesArea), BorderLayout.CENTER);
+        revalidate();
+        repaint();
+    }
+    private void clearMessages() { //clear msgs
+        messagesArea.setText("");
+    }
+    public static void main(String[] args) { //main method 
+        DiscussionBoard gui = new DiscussionBoard();
+        gui.setVisible(true); //make  GUI visible from lecture
+    }
+}
