@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.sql.*;
 import java.time.LocalDate;
 
@@ -274,7 +275,6 @@ public class GymNotes extends JFrame implements ActionListener { //swing.
                 messagesArea.append("No workouts available. Please add workouts first.\n");
             }
         } 
-        //catch problem loading workouts.
         catch (SQLException ex) { //catch SQL exception
             messagesArea.append("Error loading workouts: " + ex.getMessage() + "\n"); //display error
             ex.printStackTrace(); //print stack trace
@@ -322,14 +322,13 @@ public class GymNotes extends JFrame implements ActionListener { //swing.
                 }
             }
         });
-        leftPanel.add(logLabel); //add label to panel
-        leftPanel.add(workoutLabel); //add workout label
-        leftPanel.add(workoutDropdown); //add workout dropdown
-        leftPanel.add(weightLabel); //add weight label
-        leftPanel.add(weightField); //add weight field
-        leftPanel.add(logButton); //add log button
-
-        setLeftPanel(leftPanel); //update the frame
+        leftPanel.add(logLabel); 
+        leftPanel.add(workoutLabel); 
+        leftPanel.add(workoutDropdown); 
+        leftPanel.add(weightLabel); 
+        leftPanel.add(weightField); 
+        leftPanel.add(logButton); 
+        setLeftPanel(leftPanel); 
     }
 
     /**
@@ -371,42 +370,38 @@ public class GymNotes extends JFrame implements ActionListener { //swing.
                 ArrayList<String> parameters = new ArrayList<>(); //list for parameters
 
                 if (!monthStr.isEmpty()) { //check if month is entered
-                    //validate month
                     try {
-                        int month = Integer.parseInt(monthStr); //parse month
-                        if (month < 1 || month > 12) { //validate month range
+                        int month = Integer.parseInt(monthStr); 
+                        if (month < 1 || month > 12) { 
                             messagesArea.append("Invalid month. Please enter a value between 1 and 12.\n");
                             return;
                         }
-                        //month should be 2 digits
-                        String formattedMonth = String.format("%02d", month); //format month
+                        String formattedMonth = String.format("%02d", month); 
                         conditions.add("wl.logDate LIKE ?");
                         parameters.add("%-" + formattedMonth + "-%");
                     } 
-                    catch (NumberFormatException nfe) { //catch number format exception
+                    catch (NumberFormatException nfe) { 
                         messagesArea.append("Invalid month format. Please enter a numeric value.\n");
                         return;
                     }
                 }
 
                 if (!yearStr.isEmpty()) { //check if year is entered
-                    //validate year
                     try {
-                        int year = Integer.parseInt(yearStr); //parse year
-                        if (year < 0) { //validate year is positive
+                        int year = Integer.parseInt(yearStr); 
+                        if (year < 0) { 
                             messagesArea.append("Invalid year. Please enter a positive value.\n");
                             return;
                         }
                         conditions.add("wl.logDate LIKE ?");
                         parameters.add(yearStr + "-%");
                     } 
-                    catch (NumberFormatException nfe) { //catch number format exception
+                    catch (NumberFormatException nfe) { 
                         messagesArea.append("Invalid year format. Please enter a numeric value.\n");
                         return;
                     }
                 }
 
-                //PUT WHERE if there are any conditions
                 if (!conditions.isEmpty()) {
                     queryBuilder.append("WHERE ");
                     for (int i = 0; i < conditions.size(); i++) {
@@ -417,16 +412,16 @@ public class GymNotes extends JFrame implements ActionListener { //swing.
                     }
                 }
 
-                queryBuilder.append(" ORDER BY wl.logDate ASC"); //order results
-                String finalQuery = queryBuilder.toString(); //final query string
+                queryBuilder.append(" ORDER BY wl.logDate ASC"); 
+                String finalQuery = queryBuilder.toString(); 
 
-                try (PreparedStatement ps = conn.prepareStatement(finalQuery)) { //prepare statement
-                    //set param.
+                try (PreparedStatement ps = conn.prepareStatement(finalQuery)) { 
                     for (int i = 0; i < parameters.size(); i++) {
-                        ps.setString(i + 1, parameters.get(i)); //set each parameter
+                        ps.setString(i + 1, parameters.get(i)); 
                     }
-                    try (ResultSet rs = ps.executeQuery()) { //execute query
-                        boolean found = false; //flag to check if any records found
+                    try (ResultSet rs = ps.executeQuery()) { 
+                        boolean found = false; 
+
                         if (conditions.isEmpty()) {
                             messagesArea.append("Displaying all workouts:\n");
                         } 
@@ -436,35 +431,46 @@ public class GymNotes extends JFrame implements ActionListener { //swing.
                         else if (!monthStr.isEmpty()) {
                             messagesArea.append("Progress for Month: " + monthStr + " (All Years):\n");
                         } 
-                        else { //if only year str empty
+                        else {
                             messagesArea.append("Progress for Year: " + yearStr + " (All Months):\n");
                         }
-                        while (rs.next()) { //iterate through results
+
+                        // Use a HashMap to store the logs keyed by logDate
+                        HashMap<String, String> logsMap = new HashMap<>();
+
+                        while (rs.next()) {
                             found = true;
-                            messagesArea.append(rs.getString("logDate") + ": " 
-                                + rs.getString("workoutName") + " - Weight: " 
-                                + rs.getString("weightUsed") + "\n");
+                            String date = rs.getString("logDate");
+                            String workoutName = rs.getString("workoutName");
+                            String weightUsed = rs.getString("weightUsed");
+                            // Store in the HashMap
+                            logsMap.put(date, workoutName + " - Weight: " + weightUsed);
                         }
-                        if (!found) { //if no records found
+
+                        // Now print from the HashMap
+                        if (!found) {
                             messagesArea.append("No workouts found for the specified criteria.\n");
+                        } else {
+                            for (String key : logsMap.keySet()) {
+                                messagesArea.append(key + ": " + logsMap.get(key) + "\n");
+                            }
                         }
                     }
                 } 
-                catch (SQLException ex) { //catch SQL exception
-                    messagesArea.append("Error: " + ex.getMessage() + "\n"); //display error
-                    ex.printStackTrace(); //print stack trace
+                catch (SQLException ex) { 
+                    messagesArea.append("Error: " + ex.getMessage() + "\n"); 
+                    ex.printStackTrace(); 
                 }
             }
         });
         
-        //add labels
         leftPanel.add(viewLabel); 
         leftPanel.add(monthLabel); 
         leftPanel.add(monthField); 
         leftPanel.add(yearLabel); 
         leftPanel.add(yearField); 
         leftPanel.add(viewButton);
-        setLeftPanel(leftPanel); //update the frame
+        setLeftPanel(leftPanel); 
     }
 
     /**
@@ -487,60 +493,59 @@ public class GymNotes extends JFrame implements ActionListener { //swing.
         }
 
         String[] workoutNames = new String[workouts.size()]; //array to store workout names.
-        //set workoutnames
         for (int i = 0; i < workouts.size(); i++) { 
             workoutNames[i] = workouts.get(i).getWorkoutName();
         }
 
-        JList<String> workoutList = new JList<>(workoutNames); //create list for workouts
-        workoutList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); //single selection mode
-        workoutList.setVisibleRowCount(10); //set visible rows
-        JScrollPane listScrollPane = new JScrollPane(workoutList); //add scroll pane
+        JList<String> workoutList = new JList<>(workoutNames); 
+        workoutList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); 
+        workoutList.setVisibleRowCount(10); 
+        JScrollPane listScrollPane = new JScrollPane(workoutList); 
 
-        JButton deleteButton = new JButton("Delete Selected Workout"); //create delete button
+        JButton deleteButton = new JButton("Delete Selected Workout"); 
         deleteButton.setBackground(Color.RED); 
         deleteButton.setForeground(Color.WHITE); 
         deleteButton.setOpaque(true); 
         deleteButton.setBorderPainted(false); 
         deleteButton.setFocusPainted(false); 
-        deleteButton.setEnabled(true); //set true must
+        deleteButton.setEnabled(true); 
 
         //add ActionListener without lambda
         deleteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int selectedIdx = workoutList.getSelectedIndex(); //get selected index
-                if (selectedIdx < 0) { //check if no selection.
+                int selectedIdx = workoutList.getSelectedIndex(); 
+                if (selectedIdx < 0) { 
                     messagesArea.append("No workout selected to delete.\n");
                     return;
                 }
-                Workout selectedWorkout = workouts.get(selectedIdx); //get selected workout.
+                Workout selectedWorkout = workouts.get(selectedIdx); 
                 int confirm = JOptionPane.showConfirmDialog(
                         GymNotes.this,
                         "Are you sure you want to delete the workout: " + selectedWorkout.getWorkoutName() + "?",
                         "Confirm Deletion",
                         JOptionPane.YES_NO_OPTION
-                ); //ask for confirmation
-                if (confirm == JOptionPane.YES_OPTION) { //if user confirms
+                ); 
+                if (confirm == JOptionPane.YES_OPTION) { 
                     try (PreparedStatement ps = conn.prepareStatement("DELETE FROM Workouts WHERE id = ?")) {
-                        ps.setInt(1, selectedWorkout.getId()); //set workout ID
-                        ps.executeUpdate(); //execute delete
-                        messagesArea.append("Deleted workout: " + selectedWorkout.getWorkoutName() + "\n"); //notify user
-                        showDeleteWorkoutPanel(); // Refresh the panel
+                        ps.setInt(1, selectedWorkout.getId()); 
+                        ps.executeUpdate(); 
+                        messagesArea.append("Deleted workout: " + selectedWorkout.getWorkoutName() + "\n"); 
+                        showDeleteWorkoutPanel(); 
                     } 
-                    catch (SQLException ex) { //catch SQL exception
-                        messagesArea.append("Error deleting workout: " + ex.getMessage() + "\n"); //display error
-                        ex.printStackTrace(); //print stack trace
+                    catch (SQLException ex) { 
+                        messagesArea.append("Error deleting workout: " + ex.getMessage() + "\n"); 
+                        ex.printStackTrace(); 
                     }
                 }
             }
         });
 
-        leftPanel.add(deleteLabel, BorderLayout.NORTH); //add label to top
-        leftPanel.add(listScrollPane, BorderLayout.CENTER); //add list to center
-        leftPanel.add(deleteButton, BorderLayout.SOUTH); //add button to bottom
+        leftPanel.add(deleteLabel, BorderLayout.NORTH); 
+        leftPanel.add(listScrollPane, BorderLayout.CENTER); 
+        leftPanel.add(deleteButton, BorderLayout.SOUTH); 
 
-        setLeftPanel(leftPanel); //update the frame
+        setLeftPanel(leftPanel); 
     }
 
     /**
@@ -548,24 +553,24 @@ public class GymNotes extends JFrame implements ActionListener { //swing.
      * @return An ArrayList of Workout objects.
      */
     private ArrayList<Workout> getAllWorkouts() {
-        ArrayList<Workout> workouts = new ArrayList<>(); //create list to store workouts
-        String query = "SELECT id, workoutName, description FROM Workouts"; //SQL query to fetch workouts
+        ArrayList<Workout> workouts = new ArrayList<>(); 
+        String query = "SELECT id, workoutName, description FROM Workouts"; 
         try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) { //execute query
-            while (rs.next()) { //iterate through results
+             ResultSet rs = stmt.executeQuery(query)) { 
+            while (rs.next()) { 
                 Workout workout = new Workout(
-                    rs.getInt("id"), //get workout ID
-                    rs.getString("workoutName"), //get workout name
-                    rs.getString("description") //get workout description
+                    rs.getInt("id"), 
+                    rs.getString("workoutName"), 
+                    rs.getString("description") 
                 );
-                workouts.add(workout); //add to list
+                workouts.add(workout); 
             }
         } 
-        catch (SQLException ex) { //catch SQL exception
-            messagesArea.append("Error fetching workouts: " + ex.getMessage() + "\n"); //display error
-            ex.printStackTrace(); //print stack trace
+        catch (SQLException ex) { 
+            messagesArea.append("Error fetching workouts: " + ex.getMessage() + "\n"); 
+            ex.printStackTrace(); 
         }
-        return workouts; //return list of workouts
+        return workouts; 
     }
 
     /**
@@ -574,18 +579,18 @@ public class GymNotes extends JFrame implements ActionListener { //swing.
      * @param panel The JPanel to set as the left panel.
      */
     private void setLeftPanel(JPanel panel) {
-        getContentPane().removeAll(); //clear the current frame contents.
-        add(panel, BorderLayout.WEST); //add the new panel to the left.
-        add(new JScrollPane(messagesArea), BorderLayout.CENTER); //keep messages area
-        revalidate(); //refresh the frame
-        repaint(); //repaint frame
+        getContentPane().removeAll(); 
+        add(panel, BorderLayout.WEST); 
+        add(new JScrollPane(messagesArea), BorderLayout.CENTER); 
+        revalidate(); 
+        repaint(); 
     }
 
     /**
      * Clears the messages area.
      */
     private void clearMessages() {
-        messagesArea.setText(""); //clear the messages area
+        messagesArea.setText(""); 
     }
 
     /**
@@ -595,14 +600,14 @@ public class GymNotes extends JFrame implements ActionListener { //swing.
     public static void main(String[] args) {
         //global exception handler
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-            throwable.printStackTrace(); //print stack trace for any uncaught exceptions
+            throwable.printStackTrace(); 
         });
 
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                GymNotes gui = new GymNotes(); //create instance of GymNotes
-                gui.setVisible(true); //GUI IS ON
+                GymNotes gui = new GymNotes(); 
+                gui.setVisible(true); 
             }
         });
     }
